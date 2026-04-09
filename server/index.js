@@ -5,7 +5,7 @@ import { app } from "./app.js";
 import { createServer } from "http";
 
 dotenv.config({
-  path: './env'
+  path: './.env'
 });
 
 const server = createServer(app);
