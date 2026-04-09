@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Globe, Info, MessageCircleWarning, Users, Zap } from 'lucide-react';
+import { ArrowLeft, Globe, Info, MessageCircleWarning, Users, Zap, Download } from 'lucide-react';
 
 export default function IdeaDetail() {
   const params = useParams();
   const [idea, setIdea] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
+  const reportRef = useRef(null);
 
   useEffect(() => {
     if (!params.id) return;
@@ -76,13 +78,35 @@ export default function IdeaDetail() {
 
   const { report } = idea;
 
+  const handleDownloadPDF = () => {
+    // The native print dialog gracefully handles the browser's modern CSS color functions (like oklab)
+    // used by Tailwind v4. Users can select "Save as PDF" to export.
+    window.print();
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
-      <Link href="/dashboard" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors group">
-        <ArrowLeft /> 
-        Back to Dashboard
-      </Link>
+      <div className="flex justify-between items-center sm:px-0 px-4 print:hidden">
+        <Link href="/dashboard" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors group">
+          <ArrowLeft className="w-5 h-5 mr-1 transform group-hover:-translate-x-1 transition-transform" /> 
+          Back to Dashboard
+        </Link>
 
+        <button 
+          onClick={handleDownloadPDF}
+          disabled={isExporting}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 font-medium text-sm border border-blue-200 dark:border-blue-800"
+        >
+          {isExporting ? (
+            <span className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+          ) : (
+            <Download className="w-4 h-4" />
+          )}
+          {isExporting ? 'Generating...' : 'Export PDF'}
+        </button>
+      </div>
+
+      <div ref={reportRef} className="space-y-8 p-1 sm:p-4 bg-slate-50 dark:bg-background rounded-3xl">
       <div className="space-y-4">
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
           {idea.title}
@@ -187,6 +211,7 @@ export default function IdeaDetail() {
           </div>
         </div>
 
+      </div>
       </div>
 
     </div>
